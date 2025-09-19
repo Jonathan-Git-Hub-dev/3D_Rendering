@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="screen.css">
+</head>
+<body>
+
+<h1>Screen</h1>
+<div id="container" class="s_frame"></div>
+
+</body>
+<script>
+    const width_pixels = 200
+    const height_pixels = 100
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById("container")
+        for(let i=0; i<width_pixels*height_pixels; i++)
+        {
+            const newDiv = document.createElement("div");
+            newDiv.classList = "s_p";
+            newDiv.id = String(i%width_pixels)+","+String(Math.floor(i/width_pixels));//0-79
+            container.appendChild(newDiv);
+        }
+
+    
+        //no looking up or down so ignore z_angle
+
+        function print_point(origin, point, xy_angle)
+        {
+
+        }
+        /*function new_point(origin, point, z_angle)
+        {
+            //when z is not 90
+            let distance = (point[0] - orign[0])**2+(point[0] - orign[0])**2+(point[0] - orign[0])**2;
+            let z_len = Math.sqrt(distance/(1+(1/Math.tan(z_angle)**2)))
+
+            console.log("z equals: " + z)
+        }*/
+        function new_point_2(origin, point, z_angle, xy_angle)
+        {   
+            //
+            let distance = Math.sqrt((point[0] - origin[0])**2+(point[1] - origin[1])**2+(point[2] - origin[2])**2);
+            console.log("distacnece " + distance);
+            if(z_angle == 0)//looking directly up all distance move in the +z direction
+            {
+                return [origin[0], origin[1], origin[2] + distance];
+            }
+            if(z_angle == 180)//looking directly down all distance moved in the -z direction
+            {
+                return [origin[0], origin[1], origin[2] - distance];
+            }
+
+            if(z_angle == 90)//no movement in the z direction
+            {
+                //top-right
+                if(xy_angle <= 90 )
+                {
+                    //x = o
+                    //y = a
+                    let x = Math.sin(xy_angle * (Math.PI / 180)) * distance;
+                    let y = Math.cos(xy_angle * (Math.PI / 180)) * distance;
+                    //console.log(xy_angle)
+                    //console.log(distance)
+                    //console.log(x)
+            
+                    return [origin[0] + x, origin[1] - y, origin[2]];
+                }
+                else if(xy_angle <= 180)//bottom-right
+                {
+                    let x = Math.cos((xy_angle - 90) * (Math.PI / 180)) * distance;
+                    let y = Math.sin((xy_angle - 90) * (Math.PI / 180)) * distance;
+
+                    //console.log(xy_angle)
+                    //console.log(distance)
+                    //console.log(x)
+                    return [origin[0] + x, origin[1] + y, origin[2]];
+                }
+                else if(xy_angle <= 270)//bottom-left
+                {
+                    let x = Math.sin((xy_angle - 180)* (Math.PI / 180)) * distance;
+                    let y = Math.cos((xy_angle - 180) * (Math.PI / 180)) * distance;
+                    //console.log(xy_angle)
+                    //console.log(distance)
+                    //console.log(x)
+            
+                    return [origin[0] - x, origin[1] + y, origin[2]];
+                }
+                else//top-left
+                {
+                    let x = Math.cos((xy_angle - 270) * (Math.PI / 180)) * distance;
+                    let y = Math.sin((xy_angle - 270) * (Math.PI / 180)) * distance;
+
+                    //console.log(xy_angle)
+                    //console.log(distance)
+                    //console.log(x)
+                    return [origin[0] - x, origin[1] - y, origin[2]];
+                }
+            }
+            else
+            {
+                //must do 3d 
+                //distance^2 = z^2 + y^2 + x^2
+                //do some angle manipulation
+                //tan(man angle) = z/a
+                //a= z/tan(man angle)
+
+                //the x^2 and y^2 components = a^2?
+                //proof
+                // y = sin(x)*a
+                // x = cos(x)*a
+                //a^2 = (sin(x)*a)^2 + (cos(x)*a)^2
+                //a^2 = sin(x)^2 * a^2 + cos(x)^2 * a^2
+                //a^2    = (sin(x)^2 + cos(x)^2) * a^2  
+                
+                //distance^2 = z^2 + a^2
+                //distance^2 = z^2 + (z/tan(manipulated angle))^2
+                //distance^2 = z^2 + (z^2 / tan(ma)^2)
+                //distance^2 = (1 + 1/tan(man)^2) * z^2
+                //(distance^2) / (1 + 1/tan(man)^2) = z^2
+                
+                //this is probably maniputaler poorly
+                //we want the angle to be angle from the xy plane
+                //unmanipulated angle is from the z plane
+                let manipulated_angle = ( z_angle < 90 ? 90 - z_angle : z_angle - 90 );
+
+                let z = Math.sqrt((distance**2) / (1 + 1/Math.tan(manipulated_angle * (Math.PI / 180))**2));
+                console.log(distance)
+                console.log("ma : " + manipulated_angle)
+                console.log("z is: " + z);
+                let a = z/Math.tan(manipulated_angle  * (Math.PI / 180))//shared by xy
+
+                //change z direction deppending on angle
+                if(z_angle > 90)
+                {
+                    z = -1*z;
+                }
+
+                //go for all quandrents
+                //probably can just do 4 ranges and dont the == 0,90,180,270,360
+                if(xy_angle == 0 || xy_angle == 360)
+                {//
+                    return [origin[0], origin[1] - a, origin[2] + z];
+                }
+                if(xy_angle == 90)
+                {
+                    return [origin[0] + a, origin[1], origin[2] + z];
+                }
+                if(xy_angle == 180)
+                {//
+                    return [origin[0], origin[1] + a, origin[2] + z];
+                }
+                if(xy_angle == 270)
+                {
+                    return [origin[0] - a, origin[1], origin[2] + z];
+                }
+                if(xy_angle < 90)
+                {
+                    return [origin[0] + Math.sin(xy_angle * (Math.PI / 180) )*a, origin[1]-Math.cos(xy_angle * (Math.PI / 180))*a, origin[2] + z];
+                }
+                if(xy_angle < 180)
+                {
+                    return [origin[0] + Math.cos((xy_angle-90) * (Math.PI / 180) )*a, origin[1] + Math.sin((xy_angle-90) * (Math.PI / 180))*a, origin[2] + z];
+                }
+                if(xy_angle < 270)
+                {
+                    return [origin[0] - Math.sin((xy_angle-180) * (Math.PI / 180) )*a, origin[1] + Math.cos((xy_angle-180) * (Math.PI / 180))*a, origin[2] + z]; 
+                }
+                if(xy_angle < 360)
+                {
+                    return [origin[0] - Math.cos((xy_angle-270) * (Math.PI / 180) )*a, origin[1] - Math.sin((xy_angle-270) * (Math.PI / 180))*a, origin[2] + z];
+                }
+
+
+            }
+        }
+        function ratios(z_angle, xy_angle)
+        {
+            /*returns
+            [
+                x_contribution_to_width
+                x_contribution_to_height
+                y_contribution_to_width
+                y_contribution_to_height
+                z_contribution_to_width
+                z_contribution_to_height
+            ]
+            */
+           if(z_angle == 0 || z_angle == 180)
+           {
+                //movement in z direction do nothing
+                // x and y depend on xy_angle
+                let x_w;
+                let x_h;
+                let y_w;
+                let y_h;
+                if(xy_angle < 90)
+                {
+                    console.log("the good stuff")
+                    y_w = 1 * Math.sin(xy_angle * (Math.PI / 180))
+                    y_h = -1 * Math.cos(xy_angle * (Math.PI / 180))
+                    x_w = Math.cos(xy_angle * (Math.PI / 180))//Math.sin(xy_angle * (Math.PI / 180))
+                    x_h = Math.sin(xy_angle * (Math.PI / 180))
+                }
+                else if(xy_angle < 180)
+                {
+                    y_w = Math.cos((xy_angle - 90) * (Math.PI / 180))
+                    y_h = Math.sin((xy_angle - 90) * (Math.PI / 180))
+                    x_w = -1 * Math.sin((xy_angle - 90) * (Math.PI / 180))//Math.sin(xy_angle * (Math.PI / 180))
+                    x_h = Math.cos((xy_angle - 90) * (Math.PI / 180))
+                }
+                else if(xy_angle < 270)
+                {
+                    y_w = -1 * Math.sin((xy_angle - 180) * (Math.PI / 180))
+                    y_h = Math.cos((xy_angle - 180) * (Math.PI / 180))
+                    x_w = Math.cos((xy_angle - 180) * (Math.PI / 180))//Math.sin(xy_angle * (Math.PI / 180))
+                    x_h = Math.sin((xy_angle - 180) * (Math.PI / 180))
+                }
+                else if(xy_angle < 360)
+                {
+                    y_w = Math.sin((xy_angle - 270) * (Math.PI / 180))
+                    y_h = Math.cos((xy_angle - 270) * (Math.PI / 180))
+                    x_w = Math.cos((xy_angle - 270) * (Math.PI / 180))//Math.sin(xy_angle * (Math.PI / 180))
+                    x_h = -1 * Math.sin((xy_angle - 270) * (Math.PI / 180)) 
+                }
+                else//360
+                {
+                    y_w = 0
+                    y_h = 1
+                    x_w = 1
+                    x_h = 0
+                }
+
+                return [x_w, x_h, y_w, y_h, 0, 0];
+           }
+
+           if(z_angle == 90)
+           {
+                if(xy_angle == 0 || xy_angle == 360)
+                {
+                    //looking down y so y does nothing
+                    //console.log("abc");
+                    return [1,0,0,0,0,1]
+                }
+                if(xy_angle < 90)
+                {
+                    //console.log("this si the thing");
+                    // this is experimental
+                    return [-1*Math.cos((xy_angle) * (Math.PI / 180)),0,-1*Math.sin((xy_angle) * (Math.PI / 180)),0,0,1]
+                    //return [Math.cos((xy_angle) * (Math.PI / 180)),0,-1*Math.sin((xy_angle) * (Math.PI / 180)),0,0,1]
+                }
+                if(xy_angle < 180)
+                {
+                    //console.log("doing 180:" + (xy_angle-90))
+                    return [-1*Math.sin((xy_angle-90) * (Math.PI / 180)),0,Math.cos((xy_angle -90) * (Math.PI / 180)),0,0,1]
+                }
+                if(xy_angle < 270)
+                {
+                    return [-1*Math.cos((xy_angle - 180) * (Math.PI / 180)),0,-1*Math.sin((xy_angle-180) * (Math.PI / 180)),0,0,1]
+                }
+                if(xy_angle < 360)
+                {
+                    return [Math.sin((xy_angle - 270) * (Math.PI / 180)),0,Math.cos((xy_angle - 270) * (Math.PI / 180)),0,0,1]
+                }
+           }
+          
+
+           //else we have some z and some xy
+           if(z_angle < 90)//looking up
+           {
+                if(xy_angle == 0 || xy_angle == 360)
+                {
+                    return [1,0,0,0,0,Math.sin(z_angle)]
+                    //return [1,0,0,0,0,1]
+                }
+                if(xy_angle < 90)
+                {
+                    console.log("we are doing the right angle");
+                    let down_bit = Math.sin(z_angle)
+                    //let down_bit = Math.cos(z_angle)
+                    //distribute down bit between x and y
+                    //the more you are looking down y the more y gets down_bit
+                    //the more you are looking down x the more x gets down_bit
+
+                    //kinda trying random shi here
+                    //xh, yh could be sin or cos, not sure
+                    let xh = down_bit * Math.sin((xy_angle) * (Math.PI / 180));
+                    let yh = down_bit * Math.cos((xy_angle) * (Math.PI / 180));
+                    let xw = (Math.cos((xy_angle) * (Math.PI / 180)))// * (1-down_bit);
+                    let yw = (-1*Math.sin((xy_angle) * (Math.PI / 180)))// * (1-down_bit);
+                    //let xw =Math.cos((xy_angle) * (Math.PI / 180));
+                    //let yw =-1*Math.sin((xy_angle) * (Math.PI / 180));
+                    console.log("down_bit: " + down_bit)
+                    console.log("xh: " + xh + " yh: " + yh)
+
+
+                    return [xw, xh, yw,yh,0,Math.sin(z_angle)]
+                    //return [1,0,0,0,0,Math.sin(z_angle)]
+                }
+           }
+           else//looking down
+           {
+
+           }
+
+
+        }
+
+        let origin = [0,0,0];
+        let xy_angle = 0;//0-360
+        let z_angle = 90//0-180 90 in neteral
+        let points = 
+        [
+            [-1,-2,-1],[1,-2,-1],[-1,-2,1],[1,-2,1],[-1,-4,-1],[1,-4,-1],[-1,-4,1],[1,-4,1],
+            [-4,-2,-1],[-2,-2,-1],[-2,-2,1],[-4,-2,1],[-2,-4,-1],[-2,-2,-1],[-4,-4,1],[-2,-4,1]
+            /*[-1,-2,-1],[1,-2,-1],[-1,-2,1],[1,-2,1],[-1,-4,-1],[1,-4,-1],[-1,-4,1],[1,-4,1]*/
+        ];
+        
+
+        //let points = [[5,6,-1],[5,9,-1],[8,6,-1],[8,9,-1],[5,6,-4],[5,9,-4],[8,6,-4],[8,9,-4]];
+        //let points = [[5,-5,-1],[5,-8,-1],[8,-5,-1],[8,-8,-1],[5,-5,-4],[5,-8,-4],[8,-5,-4],[8,-8,-4]];
+        //let points = [[2,-2,-2],[2,-4,-2],[-2,-2,-2],[-2,-4,-2],[2,-2,2],[2,-4,2],[-2,-2,2],[-2,-4,2], [0,-5,0]];
+        
+        
+        
+        
+        
+        
+        //let points = [[2,-2,-2],[2,-2,2]];
+        //let points = [[1,-1,0],[1,-1,1],[1,-1,-1],[1,-1,1.3],[1,-1,-1.3]];
+        //let points = [[1,-1,0],[1,-1,1]];
+        //let points = [[]]//,[],[],[]]
+        //let points2 = [[0,0,10],[0,4,10],[4,0,10],[4,4,10]];
+        //let points = [[-1,6,-1],[-1,6,1],[1,6,-1],[1,6,1],[-1,8,-1],[1,8,-1],[-1,8,1],[1,8,1]]
+        //let points = [[9,-1,-1],[9,-1,1],[9,1,-1],[9,1,1],[11,-1,-1],[11,1,-1],[11,-1,1],[11,1,1]]
+        //let points = [[-1,-1,-5],[1,-1,-5],[-1,1,-5],[1,1,-5],[-1,-1,-7],[-1,1,-7],[1,-1,-7],[1,1,-7]]
+        const screen_width_total = 2;
+        const screen_height_total = 1;
+        
+
+        let ratio = ratios(z_angle, xy_angle)
+        console.log("ratios " + ratio)
+
+        for(let i=0; i<points.length; i++)
+        {
+            let dist = Math.sqrt((points[i][0] - origin[0])**2+(points[i][1] - origin[1])**2+(points[i][2] - origin[2])**2);
+            let x_size = screen_width_total * dist;
+            let y_size = screen_height_total * dist;
+
+            //figuring out ratio
+            let cent = new_point_2(origin, points[i], z_angle, xy_angle)
+            console.log("new center: " + cent);
+            console.log("x size : " + x_size + " y_size: " + y_size)
+            //console.log(ratio)
+            //let w = (points[i][0] - origin[0]) * ratio[0] + (points[i][1] - origin[1]) * ratio[2] + (points[i][2] - origin[2]) * ratio[4];
+            //x = Math.floor(x)
+            //let h = (points[i][0] - origin[0]) * ratio[1] + (points[i][1] - origin[1]) * ratio[3] + (points[i][2] - origin[2]) * ratio[5];
+            let w = (points[i][0] - cent[0]) * ratio[0] + (points[i][1] - cent[1]) * ratio[2] + (points[i][2] - cent[2]) * ratio[4];
+            let h = (points[i][0] - cent[0]) * ratio[1] + (points[i][1] - cent[1]) * ratio[3] + (points[i][2] - cent[2]) * ratio[5];
+            console.log("x contribution to w:" + (points[i][0] - cent[0]) * ratio[0]);
+            console.log("x contribution to h:" + (points[i][0] - cent[0]) * ratio[1]);
+            console.log("y contribution to w:" + (points[i][1] - cent[1]) * ratio[2]);
+            console.log("y contribution to h:" + (points[i][1] - cent[1]) * ratio[3]);
+            console.log("z contribution to w:" + (points[i][2] - cent[2]) * ratio[4]);
+            console.log("z contribution to h:" + (points[i][2] - cent[2]) * ratio[5]);
+
+            console.log("w: " + w)
+            console.log("h: " + h)
+            //y = Math.floor(y)
+            //console.log("x: " + x + " y: " + y + " screen size" + x_size)
+            //range is -x_size/2 to x_size/2
+            //-7 to 7
+            //add 7 to point
+            let wp = (((w + x_size/2) / x_size) * width_pixels)
+            let hp = (((h + y_size/2) / y_size) * height_pixels)
+            wp = Math.floor(wp)
+            hp = Math.floor(hp)
+
+            document.getElementById(wp+','+hp).style.backgroundColor = "yellow";
+        }
+
+    });
+</script>
+</html> 

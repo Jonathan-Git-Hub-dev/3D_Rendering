@@ -1,0 +1,20 @@
+if we had a point and [0,0,0] that at distance of 1 has a screen of width 2 and height 1
+the angles are z 90 (looking neither up or down) and xy= 0 (looking down the -y direction)
+and it has a geometry point at [-1,-1,0] so the left-middle edge of the screen at a distance of one
+the actual distance would be sqrt(2) and so this point would no longer be at the edge of the screen (hard to explain)
+(trying to explain) render calculates th distance from the point then finds the middle of the screen at that distance,
+then uses the screen size at a distance of one to figure out the screen size at this new distance. since this point was on the edge
+when distance was one and now distance is bigger it will no longer be on the edge.
+this is true of all points on the edge and bassically every point that isnt an 'exact gradinet', they will all be moved to the center.
+see ex.jpg for an example of this phenomina.
+
+so the question is what should the actual behaviour be?
+well it is obvious that some points should end on the end of the screen, some should even go further but be cut of.
+this is how it looks in real life.
+
+how would this be achived?
+
+ok kinda random by try 2 will find the center point that is in the same plane.
+this means that in a previous example point [-1,-1,0] in the plain of 1 no sqrt(2)
+
+i have no idea how this would affcet th rentering

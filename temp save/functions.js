@@ -1,0 +1,133 @@
+//import {screen_width_pixels, screen_height_pixels, width_growth_factor, height_growth_factor} from './variables.js'
+
+function Cos(angle)
+{
+    return(Math.cos(angle*(Math.PI / 180)))
+}
+function Sin(angle)
+{
+    return(Math.sin(angle*(Math.PI / 180)))
+}
+function Tan(angle)
+{
+    return(Math.tan(angle*(Math.PI / 180)))
+}
+
+
+
+function clear()//changes all pixelss back to aqua
+{
+    for(let i=0; i < (screen_width_pixels*screen_height_pixels) ; i++)
+    {
+        document.getElementById(String(i%screen_width_pixels)+","+String(Math.floor(i/screen_width_pixels))).style.backgroundColor = "aqua"
+    }
+}
+
+function create_screen()//initializes the display
+{
+        const container = document.getElementById("container")
+        for(let i=0; i<screen_width_pixels*screen_height_pixels; i++)
+        {
+            const newDiv = document.createElement("div");
+            newDiv.classList = "s_p";
+            newDiv.id = String(i%screen_width_pixels)+","+String(Math.floor(i/screen_width_pixels));//0-79
+            container.appendChild(newDiv);
+        }
+        document.addEventListener('keydown', move_user)
+        render("orange", points, origin, z_angle, xy_angle);
+}
+
+
+
+function move_user(event)
+{
+    event.preventDefault();
+    const pressedKey = event.key;
+
+    //movement
+    if (pressedKey === 'a')
+        origin = [origin[0]-0.25,origin[1],origin[2]]
+    else if (pressedKey === 'w')
+        origin = [origin[0],origin[1]-0.25,origin[2]]
+    else if (pressedKey === 's')
+        origin = [origin[0],origin[1]+0.25,origin[2]]
+    else if (pressedKey === 'd') 
+        origin = [origin[0]+0.25,origin[1],origin[2]]
+    else if(pressedKey === ' ')
+        origin = [origin[0],origin[1],origin[2]-0.25]
+    else if(event.shiftKey)
+        origin = [origin[0],origin[1],origin[2]+0.25]
+    
+    else if(pressedKey === 'ArrowUp')//changing angle
+    {
+        if(z_angle > 10)//currently doesnt support looking completely up
+            z_angle-=1
+    }
+    else if(pressedKey === 'ArrowDown')
+    {
+        if(z_angle < 170)//currently doesnt support looking completely down
+            z_angle+=1
+    }
+    else if(pressedKey === 'ArrowLeft')
+    {
+        xy_angle-=1
+        if(xy_angle < 0)//reseting to other side
+            xy_angle = 359
+    }
+    else if(pressedKey === 'ArrowRight')
+    {
+        xy_angle+=1
+        xy_angle = xy_angle % 360//reseting
+    }
+    else
+    {
+        return;
+    }
+
+    //display new stats    
+    document.getElementById("z").innerHTML = z_angle;
+    document.getElementById("xy").innerHTML = xy_angle;
+    document.getElementById("origin").innerHTML = origin;
+
+    //rerender
+    clear();
+    render("orange", points, origin, z_angle, xy_angle);
+    document.getElementById(100+','+50).style.backgroundColor = 'black';
+}
+
+function render(colour, ps, origin, z_angle, xy_angle)
+{
+    let [x_to_width, x_to_height, y_to_width, y_to_height, z_to_width, z_to_height] = ratios(z_angle, xy_angle)
+
+    for(let i=0; i<ps.length; i++)
+    {
+        //find the center of the screen for this point
+        let newC = find_center(origin, ps[i], z_angle, xy_angle)
+
+        console.log('new center '+ newC)
+        if(newC.length == 3)//for not completely mixed direction
+        {
+            let w_index = (ps[i][0]-newC[0])*x_to_width + (ps[i][1]-newC[1])*y_to_width + (ps[i][2]-newC[2])*z_to_width
+            let h_index = (ps[i][0]-newC[0])*x_to_height + (ps[i][1]-newC[1])*y_to_height + (ps[i][2]-newC[2])*z_to_height
+
+            let distance = Math.sqrt((origin[0]-newC[0])**2 + (origin[1]-newC[1])**2 + (origin[2]-newC[2])**2)
+
+            let screen_width = distance * width_growth_factor
+            let screen_height = distance * height_growth_factor
+
+            let wp = (w_index + screen_width/2)/screen_width
+            let hp = (h_index + screen_height/2)/screen_height
+
+            wp*=(screen_width_pixels-1)
+            hp*=(screen_height_pixels-1)
+            wp = Math.floor(wp)
+            hp = Math.floor(hp)
+
+            document.getElementById(wp+','+hp).style.backgroundColor = colour;
+        }
+        else//when direction is fully mixed math is donw in find center
+        {
+            document.getElementById(Math.floor(newC[0])+','+Math.floor(newC[1])).style.backgroundColor = colour;
+        }
+    }
+}
