@@ -1,0 +1,7 @@
+- make movement relative to the way a user is facing not current is relative to xy_angle = 0
+- convert to c#
+- quick check if point are likely to be off screen before more precise pixel accurate rendering
+- create object class structure with faces - > groups of three point
+- render lines
+- render triangles
+- work it geometries that are only partialy on the screen

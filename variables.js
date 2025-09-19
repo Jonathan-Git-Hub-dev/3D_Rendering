@@ -14,12 +14,7 @@ let origin = [0,0,0];
 //if user is looking up or down
 // 90 degrees means the user is looking flat with 0-90 meaning looking up and 90-180 looking down
 let z_angle = 90//0-180 90 in neteral
-let xy_angle = 0;//0-359
+let xy_angle = 90;//0-359
 
 // points to be rendered
 let points = [[-0.5,-4,-0.5],[-0.5,-4,0.5],[0.5,-4,-0.5],[0.5,-4,0.5],[-0.5,-5,-0.5],[-0.5,-5,0.5],[0.5,-5,-0.5],[0.5,-5,0.5]]
-
-
-//let points = [[4,0.5,0.5],[4,0.5,-0.5],[4,-0.5,0.5],[4,-0.5,-0.5],[5,0.5,0.5],[5,0.5,-0.5],[5,-0.5,0.5],[5,-0.5,-0.5]];
-// //let points = [[0,-4,0]];
-//let points = [[-0.5,4,-0.5],[-0.5,4,0.5],[0.5,4,-0.5],[0.5,4,0.5],[-0.5,5,-0.5],[-0.5,5,0.5],[0.5,5,-0.5],[0.5,5,0.5]]

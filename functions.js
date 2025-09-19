@@ -45,19 +45,32 @@ function move_user(event)
     const pressedKey = event.key;
 
     //movement
+    console.log("need to change movement based on where user is looking")
     if (pressedKey === 'a')
+    {
+        //move in the direction user is facing
         origin = [origin[0]-0.25,origin[1],origin[2]]
+    }
     else if (pressedKey === 'w')
+    {
         origin = [origin[0],origin[1]-0.25,origin[2]]
+    }
     else if (pressedKey === 's')
+    {
         origin = [origin[0],origin[1]+0.25,origin[2]]
-    else if (pressedKey === 'd') 
+    }
+    else if (pressedKey === 'd')
+    { 
         origin = [origin[0]+0.25,origin[1],origin[2]]
+    }
     else if(pressedKey === ' ')
+    {
         origin = [origin[0],origin[1],origin[2]-0.25]
+    }
     else if(event.shiftKey)
+    {
         origin = [origin[0],origin[1],origin[2]+0.25]
-    
+    }
     else if(pressedKey === 'ArrowUp')//changing angle
     {
         if(z_angle > 10)//currently doesnt support looking completely up
