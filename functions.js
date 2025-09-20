@@ -12,6 +12,124 @@ function Tan(angle)
 {
     return(Math.tan(angle*(Math.PI / 180)))
 }
+function Atan(opposite, adjacent)
+{
+    return Math.atan(opposite / adjacent) * (180 / Math.PI);
+}
+
+function quick_check(origin, point, z_angle, xy_angle)
+{
+    //true = reprocess for rendering
+    //false = skip
+    if(origin[0] == point[0] && origin[1] == point[1] && origin[2] == point[2])
+    {
+        return false;
+    }
+
+    //find angle that origin makes with point,
+    //if similar our actual angle render point
+
+    //z 
+    let horizontal_distance = Math.sqrt((point[0] - origin[0])**2 + (point[1] - origin[1])**2)
+    let vertival_distance = point[2] - origin[2];
+    
+    let new_z
+    if(horizontal_distance == 0)
+    {
+        if(z>0)
+        {
+            z = 180
+        }
+        else
+        {
+            z = 0
+        }
+    }
+    else
+    {
+        new_z = Atan(vertival_distance , horizontal_distance);
+    }
+
+    //check z first so there might not be a need to cehck xy
+    //window expands ~27 degress out in the z direction of each side
+    if(Math.abs(z_angle-new_z) > 27)
+    {
+        return false;
+    }
+
+
+
+    //new x,y
+    let x_component = point[0] - origin[0]
+    let y_component = point[1] - origin[1]
+    let new_xy;
+    /*
+    -3 6 = 9
+    6 -3 = -9
+    */
+    if(x == 0)
+    {
+        if(y < 0)
+            new_xy = 0
+        else
+            new_xy = 180
+    }
+    else if(x > 0)
+    {
+        if(y == 0)
+            new_xy = 90
+        else if(y>0)
+        {
+            new_xy = Atan(y_component, x_component) +90;
+        }
+        else//negative y
+        {
+            new_xy = Atan(x_component, y_component);
+        }
+    }
+    else//negative x
+    {
+        if(y == 0)
+            new_xy = 270
+        else if(y>0)
+        {
+            new_xy = Atan(x_component, y_component) +180;
+        }
+        else//negative y
+        {
+            new_xy = Atan(y_component, x_component) +270;
+        }
+    }
+
+    //    window expands 45 degress out in the xy direction of each side
+    // add to both so we can 
+    if(xy_angle < 45)
+    {
+        //new_xy = 360 - new_xy
+        if(new_xy < xy_angle)
+        {
+            return true
+        }
+        if(new_xy-45 <= xy_angle)
+        {
+            return true
+        }
+        if((360 - new_xy)+xy_angle < 45)
+        {
+            return true
+        }
+        return false
+    }
+    else
+    {
+        if(Math.abs(xy_angle-new_xy) > 45)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 
 
@@ -34,7 +152,8 @@ function create_screen()//initializes the display
             container.appendChild(newDiv);
         }
         document.addEventListener('keydown', move_user)
-        render("orange", points, origin, z_angle, xy_angle);
+        //render("orange", points, origin, z_angle, xy_angle);
+        render("orange", lines, origin, z_angle, xy_angle);
 }
 
 
@@ -104,43 +223,183 @@ function move_user(event)
 
     //rerender
     clear();
-    render("orange", points, origin, z_angle, xy_angle);
+    //render("orange", points, origin, z_angle, xy_angle);
+    render("orange", lines, origin, z_angle, xy_angle);
     document.getElementById(100+','+50).style.backgroundColor = 'black';
 }
 
-function render(colour, ps, origin, z_angle, xy_angle)
+function dl(x1,y1,x2,y2)
+{//this algorithm was copied from google
+    //const points = [];
+    console.log("Inital: " + x1 + " " + x2 + " " + y1 + " " + y2)
+    let dx = Math.abs(x1 - x2);
+    let dy = Math.abs(y1 - y2);
+    let sx = (x2 < x1) ? 1 : -1;
+    let sy = (y2 < y1) ? 1 : -1;
+    let err = dx - dy;
+
+    while (true) {
+        let elem = document.getElementById( String(Math.round(x2))+','+String(Math.round(y2)))
+        //console.log("dd")
+        elem.style.backgroundColor = 'yellow'
+        //points.push({ x: x0, y: y0 });
+
+        if (x2 === x1 && y2 === y1) break;
+
+        let e2 = 2 * err;
+        if (e2 > -dy) {
+            err -= dy;
+            x2 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y2 += sy;
+        }
+    }
+    //return points;
+}
+
+/*function dl(x1,y1,x2,y2)
+{
+        let grad = Math.floor(y2-y1/x2-x1);
+        
+        if(grad > 1)
+        {
+            console.log("rise dom: " + grad)
+        }
+        else
+        {
+            console.log("run dom: " + grad)
+        }
+        if(y1 > y2)
+        {
+            let temp = y1
+            y1 = y2
+            y2 = temp
+            temp = x1
+            x1=x2
+            x2=temp
+        }
+        if(x1 > x2)
+        {
+            let temp = y1
+            y1 = y2
+            y2 = temp
+            temp = x1
+            x1=x2
+            x2=temp
+        }
+
+       //console.log("Inital: " + x1 + " " + x2 + " " + y1 + " " + y2)
+
+        //while ( Math.round(x1)!=x2 && Math.round(y1)!=y2)
+        //if(Math.round(x1)!=x2 && Math.round(y1)!=y2)
+        while ( Math.round(x1)!=x2 || Math.round(y1)!=y2)
+        {
+            //console.log(x1 + " " + x2 + " " + y1 + " " + y2)
+            //console.log("bbb");
+            //console.log(String(Math.round(x1))+','+String(Math.round(y1)));
+            let elem = document.getElementById( String(Math.round(x1))+','+String(Math.round(y1)))
+            //console.log(elem)
+            elem.style.backgroundColor = 'yellow'
+            //break;
+
+            //move 1 closer to 2 using grad
+            //add one and use grad to distribute
+            let tot = Math.abs(y2-y1)+Math.abs(x2-x1)
+            //console.log("total :" + tot)
+            let xb = (Math.abs(x2-x1)/tot)//*1
+            let yb = (Math.abs(y2-y1)/tot)//*1
+            //console.log("x bit: " + xb + " yb: " + yb);
+            x1+=xb
+            y1+=yb
+            //console.log('count');
+        }
+       // console.log("Done");    
+}*/
+
+function render(colour, lines, origin, z_angle, xy_angle)
 {
     let [x_to_width, x_to_height, y_to_width, y_to_height, z_to_width, z_to_height] = ratios(z_angle, xy_angle)
 
-    for(let i=0; i<ps.length; i++)
+    for(let i=0; i<lines.length; i++)
     {
-        //find the center of the screen for this point
-        let newC = find_center(origin, ps[i], z_angle, xy_angle)
+        let p1 = lines[i][0]
+        let p2 = lines[i][1]
 
-        console.log('new center '+ newC)
-        if(newC.length == 3)//for not completely mixed direction
+
+           //find the center of the screen for this point
+        let newCp1 = find_center(origin, p1, z_angle, xy_angle)
+        let newCp2 = find_center(origin, p2, z_angle, xy_angle)
+        let x1,x2,y1,y2
+
+        //console.log('new center '+ newC)
+        if(newCp1.length == 3)//for not completely mixed direction
         {
-            let w_index = (ps[i][0]-newC[0])*x_to_width + (ps[i][1]-newC[1])*y_to_width + (ps[i][2]-newC[2])*z_to_width
-            let h_index = (ps[i][0]-newC[0])*x_to_height + (ps[i][1]-newC[1])*y_to_height + (ps[i][2]-newC[2])*z_to_height
+            //let w_index = (ps[i][0]-newC[0])*x_to_width + (ps[i][1]-newC[1])*y_to_width + (ps[i][2]-newC[2])*z_to_width
+            //let h_index = (ps[i][0]-newC[0])*x_to_height + (ps[i][1]-newC[1])*y_to_height + (ps[i][2]-newC[2])*z_to_height
 
-            let distance = Math.sqrt((origin[0]-newC[0])**2 + (origin[1]-newC[1])**2 + (origin[2]-newC[2])**2)
+            let w_index = (p1[0]-newCp1[0])*x_to_width + (p1[1]-newCp1[1])*y_to_width + (p1[2]-newCp1[2])*z_to_width
+            let h_index = (p1[0]-newCp1[0])*x_to_height + (p1[1]-newCp1[1])*y_to_height + (p1[2]-newCp1[2])*z_to_height
+
+            //let distance = Math.sqrt((origin[0]-newC[0])**2 + (origin[1]-newC[1])**2 + (origin[2]-newC[2])**2)
+            let distance = Math.sqrt((origin[0]-newCp1[0])**2 + (origin[1]-newCp1[1])**2 + (origin[2]-newCp1[2])**2)
 
             let screen_width = distance * width_growth_factor
             let screen_height = distance * height_growth_factor
 
-            let wp = (w_index + screen_width/2)/screen_width
+            /*let wp = (w_index + screen_width/2)/screen_width
             let hp = (h_index + screen_height/2)/screen_height
 
             wp*=(screen_width_pixels-1)
             hp*=(screen_height_pixels-1)
             wp = Math.floor(wp)
-            hp = Math.floor(hp)
+            hp = Math.floor(hp)*/
+            x1 = (w_index + screen_width/2)/screen_width
+            y1 = (h_index + screen_height/2)/screen_height
 
-            document.getElementById(wp+','+hp).style.backgroundColor = colour;
+            x1*=(screen_width_pixels-1)
+            y1*=(screen_height_pixels-1)
+            x1 = Math.floor(x1)
+            y1 = Math.floor(y1)
+
+            //document.getElementById(wp+','+hp).style.backgroundColor = colour;
         }
-        else//when direction is fully mixed math is donw in find center
+        else
         {
-            document.getElementById(Math.floor(newC[0])+','+Math.floor(newC[1])).style.backgroundColor = colour;
+            x1=Math.floor(newCp1[0])
+            y1=Math.floor(newCp1[1])
         }
+        if(newCp2.length == 3)//for not completely mixed direction
+        {
+            let w_index = (p2[0]-newCp2[0])*x_to_width + (p2[1]-newCp2[1])*y_to_width + (p2[2]-newCp2[2])*z_to_width
+            let h_index = (p2[0]-newCp2[0])*x_to_height + (p2[1]-newCp2[1])*y_to_height + (p2[2]-newCp2[2])*z_to_height
+
+            let distance = Math.sqrt((origin[0]-newCp2[0])**2 + (origin[1]-newCp2[1])**2 + (origin[2]-newCp2[2])**2)
+
+            let screen_width = distance * width_growth_factor
+            let screen_height = distance * height_growth_factor
+
+            x2 = (w_index + screen_width/2)/screen_width
+            y2 = (h_index + screen_height/2)/screen_height
+
+            x2*=(screen_width_pixels-1)
+            y2*=(screen_height_pixels-1)
+            x2 = Math.floor(x2)
+            y2 = Math.floor(y2)
+
+            //document.getElementById(wp+','+hp).style.backgroundColor = colour;
+        }
+        else
+        {
+            x2=Math.floor(newCp2[0])
+            y2=Math.floor(newCp2[1])
+        }
+        /*else//when direction is fully mixed math is donw in find center
+        {
+            //document.getElementById(Math.floor(newC[0])+','+Math.floor(newC[1])).style.backgroundColor = colour;
+        }*/
+       dl(x1,y1,x2,y2);
+
     }
 }
