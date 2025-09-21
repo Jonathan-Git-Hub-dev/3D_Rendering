@@ -1,5 +1,18 @@
 //import {screen_width_pixels, screen_height_pixels, width_growth_factor, height_growth_factor} from './variables.js'
 
+//what if point one beyond left of screen and point two passed the right boundery
+
+
+
+/*
+    missions
+
+    find plane at orgin and use that to figure out infront or behind
+    to draw on screen atleast one point must be on screen
+    infront of screen but both points of to the side
+    one point in front of screen one point behind(not exactly sure how to tackle this)
+*/
+
 function Cos(angle)
 {
     return(Math.cos(angle*(Math.PI / 180)))
@@ -318,6 +331,83 @@ function dl(x1,y1,x2,y2)
        // console.log("Done");    
 }*/
 
+function atleast_one(p1, p2)
+{
+    if((p1[0] < 0 || p1[0] >= screen_width_pixels || p1[1] < 0 || p1[1] >= screen_height_pixels) 
+        && (p2[0] < 0 || p2[0] >= screen_width_pixels || p2[1] < 0 || p2[1] >= screen_height_pixels))
+    {
+        return false;
+    }
+    return true;
+}
+
+function both(p1,p2)
+{
+    if(p1[0] >= 0 && p1[0] < screen_width_pixels && p1[1] >= 0 && p1[1] < screen_height_pixels 
+        && p2[0] >= 0 && p2[0] < screen_width_pixels && p2[1] >= 0 && p2[1] < screen_height_pixels)
+    {
+        return true;
+    }
+    return false;
+}
+
+function truncate(p1,p2)
+{
+    //take two points at least one on screen
+    if(both(p1,p2))
+    {
+        return [p1,p2]
+    }//now we know exactly one point is of the screen
+
+    //make p2 the off screen point
+    if(p1[0] < 0 || p1[0] >= screen_width_pixels || p1[1] < 0 || p1[1] >= screen_height_pixels)
+    {//p1 off
+        let temp = p2;
+        p2 = p1;
+        p1 = temp;
+    }
+
+    let rise = p2[1]-p1[1]
+    let run = p2[0]-p1[0]
+    let gradient = rise/run
+    let intercept = p2[1] - gradient*p2[0];
+    //console.log("int:" + intercept)
+    //p[1] = g*p[0] + b
+    //b=p[1] - g*p[0]
+
+    //x = (y-b)/g
+    //console.log("evil points " + p1 + " " + p2);
+
+    if(p2[0] < 0)
+    {
+        //what is y when x = 0
+        p2[0] = 0
+        p2[1] = Math.floor(intercept)
+    }
+    if(p2[1] < 0)
+    {
+        //what is x when y = 0
+        p2[1] = 0
+        p2[0] = Math.floor((-intercept)/gradient)
+    }
+    if(p2[0] >= screen_width_pixels)
+    {
+        //what is y when x is screen_width_pixels
+        p2[0] = screen_width_pixels-1
+        p2[1] = Math.floor(gradient*p2[0]+intercept)
+    }
+    if(p2[1] >= screen_height_pixels)
+    {
+        //what is x when y = screen_height_pixels
+    
+        p2[1] = screen_height_pixels-1
+        p2[0] = Math.floor((p2[1]-intercept)/gradient)
+    }
+
+    return [p1,p2]
+}
+
+
 function render(colour, lines, origin, z_angle, xy_angle)
 {
     let [x_to_width, x_to_height, y_to_width, y_to_height, z_to_width, z_to_height] = ratios(z_angle, xy_angle)
@@ -326,6 +416,11 @@ function render(colour, lines, origin, z_angle, xy_angle)
     {
         let p1 = lines[i][0]
         let p2 = lines[i][1]
+        //i fully expect this check to be incorrect
+        //if(quick_check(origin, p1, z_angle, xy_angle) || quick_check(origin, p2, z_angle, xy_angle))
+        //{
+
+        
 
 
            //find the center of the screen for this point
@@ -399,7 +494,11 @@ function render(colour, lines, origin, z_angle, xy_angle)
         {
             //document.getElementById(Math.floor(newC[0])+','+Math.floor(newC[1])).style.backgroundColor = colour;
         }*/
-       dl(x1,y1,x2,y2);
-
+        if(atleast_one([x1,y1], [x2,y2]))
+        {
+            let [p11, p22] = truncate([x1,y1],[x2,y2])
+            dl(p11[0],p11[1], p22[0], p22[1]);
+        }        
     }
+    //}
 }

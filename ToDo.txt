@@ -1,7 +1,14 @@
+- render lines (Done)
+
+- work it geometries that are only partialy on the screen (partialy done)
+    works for lines that go if the side of the screen
+    will not work for object that wrap around the user because the user is inside of them/
+    objects that end behind the user (this will be comeing soon)
+
+
+
 - make movement relative to the way a user is facing not current is relative to xy_angle = 0
 - convert to c#
 - quick check if point are likely to be off screen before more precise pixel accurate rendering
 - create object class structure with faces - > groups of three point
-- render lines (Done)
 - render triangles
-- work it geometries that are only partialy on the screen (working on this in next update)
