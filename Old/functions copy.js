@@ -33,68 +33,6 @@ function Atan(opposite, adjacent)
     return Math.atan(opposite / adjacent) * (180 / Math.PI);
 }
 
-function line_of_sight_vector(z_angle, xy_angle)
-{
-    let z_movement = Sin(z_angle);
-    
-    let remainder =  Math.sqrt(1 - (z_movement ** 2));
-
-    let x_movement;
-    let y_movement;
-
-    if(xy_angle < 90)
-    {
-        x_movement = Sin(xy_angle) * remainder
-        y_movement = -1*Cos(xy_angle) * remainder
-    }   
-    else if(xy_angle < 180)
-    {
-        x_movement = Cos(xy_angle-90) * remainder
-        y_movement = Sin(xy_angle-90) * remainder
-    }
-    else if(xy_angle < 270)
-    {
-        x_movement = -1*Sin(xy_angle-180) * remainder
-        y_movement = Cos(xy_angle-180) * remainder
-    }
-    else// < 360 
-    {
-        x_movement = -1*Cos(xy_angle-270) * remainder
-        y_movement = -1*Sin(xy_angle-270) * remainder
-    }
-
-    return [x_movement, y_movement, z_movement];
-}
-
-function line_of_sight_vector_xy(xy_angle)
-{
-    let x_movement;
-    let y_movement;
-
-    if(xy_angle < 90)
-    {
-        x_movement = Sin(xy_angle)
-        y_movement = -1*Cos(xy_angle)
-    }   
-    else if(xy_angle < 180)
-    {
-        x_movement = Cos(xy_angle-90)
-        y_movement = Sin(xy_angle-90)
-    }
-    else if(xy_angle < 270)
-    {
-        x_movement = -1*Sin(xy_angle-180)
-        y_movement = Cos(xy_angle-180)
-    }
-    else// < 360 
-    {
-        x_movement = -1*Cos(xy_angle-270)
-        y_movement = -1*Sin(xy_angle-270)
-    }
-
-    return [x_movement, y_movement];
-}
-
 function quick_check(origin, point, z_angle, xy_angle)
 {
     //true = reprocess for rendering
@@ -219,16 +157,97 @@ function clear()//changes all pixelss back to aqua
     }
 }
 
+function create_screen()//initializes the display
+{
+        const container = document.getElementById("container")
+        for(let i=0; i<screen_width_pixels*screen_height_pixels; i++)
+        {
+            const newDiv = document.createElement("div");
+            newDiv.classList = "s_p";
+            newDiv.id = String(i%screen_width_pixels)+","+String(Math.floor(i/screen_width_pixels));//0-79
+            container.appendChild(newDiv);
+        }
+        document.addEventListener('keydown', move_user)
+        //render("orange", points, origin, z_angle, xy_angle);
+        render("orange", lines, origin, z_angle, xy_angle);
+}
 
 
 
+function move_user(event)
+{
+    event.preventDefault();
+    const pressedKey = event.key;
 
+    //movement
+    console.log("need to change movement based on where user is looking")
+    if (pressedKey === 'a')
+    {
+        //move in the direction user is facing
+        origin = [origin[0]-0.25,origin[1],origin[2]]
+    }
+    else if (pressedKey === 'w')
+    {
+        origin = [origin[0],origin[1]-0.25,origin[2]]
+    }
+    else if (pressedKey === 's')
+    {
+        origin = [origin[0],origin[1]+0.25,origin[2]]
+    }
+    else if (pressedKey === 'd')
+    { 
+        origin = [origin[0]+0.25,origin[1],origin[2]]
+    }
+    else if(pressedKey === ' ')
+    {
+        origin = [origin[0],origin[1],origin[2]-0.25]
+    }
+    else if(event.shiftKey)
+    {
+        origin = [origin[0],origin[1],origin[2]+0.25]
+    }
+    else if(pressedKey === 'ArrowUp')//changing angle
+    {
+        if(z_angle > 10)//currently doesnt support looking completely up
+            z_angle-=1
+    }
+    else if(pressedKey === 'ArrowDown')
+    {
+        if(z_angle < 170)//currently doesnt support looking completely down
+            z_angle+=1
+    }
+    else if(pressedKey === 'ArrowLeft')
+    {
+        xy_angle-=1
+        if(xy_angle < 0)//reseting to other side
+            xy_angle = 359
+    }
+    else if(pressedKey === 'ArrowRight')
+    {
+        xy_angle+=1
+        xy_angle = xy_angle % 360//reseting
+    }
+    else
+    {
+        return;
+    }
 
+    //display new stats    
+    document.getElementById("z").innerHTML = z_angle;
+    document.getElementById("xy").innerHTML = xy_angle;
+    document.getElementById("origin").innerHTML = origin;
+
+    //rerender
+    clear();
+    //render("orange", points, origin, z_angle, xy_angle);
+    render("orange", lines, origin, z_angle, xy_angle);
+    document.getElementById(100+','+50).style.backgroundColor = 'black';
+}
 
 function line(x1,y1,x2,y2)
 {//this algorithm was copied from google
     //const points = [];
-    //console.log("Inital: " + x1 + " " + x2 + " " + y1 + " " + y2)
+    console.log("Inital: " + x1 + " " + x2 + " " + y1 + " " + y2)
     let dx = Math.abs(x1 - x2);
     let dy = Math.abs(y1 - y2);
     let sx = (x2 < x1) ? 1 : -1;
@@ -518,3 +537,116 @@ function truncate(p1,p2)
 
     return [p1,p2]
 }
+
+
+function render(colour, lines, origin, z_angle, xy_angle)
+{
+    let [x_to_width, x_to_height, y_to_width, y_to_height, z_to_width, z_to_height] = ratios(z_angle, xy_angle)
+
+    for(let i=0; i<lines.length; i++)
+    {
+        //console.log("called")
+        let p1 = lines[i][0]
+        let p2 = lines[i][1]
+        //i fully expect this check to be incorrect
+        //if(quick_check(origin, p1, z_angle, xy_angle) || quick_check(origin, p2, z_angle, xy_angle))
+        //{
+
+        
+
+
+           //find the center of the screen for this point
+        let newCp1 = find_center(origin, p1, z_angle, xy_angle)
+        let newCp2 = find_center(origin, p2, z_angle, xy_angle)
+        let x1,x2,y1,y2
+
+        //console.log('new center '+ newC)
+        if(newCp1.length == 3)//for not completely mixed direction
+        {
+            //let w_index = (ps[i][0]-newC[0])*x_to_width + (ps[i][1]-newC[1])*y_to_width + (ps[i][2]-newC[2])*z_to_width
+            //let h_index = (ps[i][0]-newC[0])*x_to_height + (ps[i][1]-newC[1])*y_to_height + (ps[i][2]-newC[2])*z_to_height
+
+            let w_index = (p1[0]-newCp1[0])*x_to_width + (p1[1]-newCp1[1])*y_to_width + (p1[2]-newCp1[2])*z_to_width
+            let h_index = (p1[0]-newCp1[0])*x_to_height + (p1[1]-newCp1[1])*y_to_height + (p1[2]-newCp1[2])*z_to_height
+
+            //let distance = Math.sqrt((origin[0]-newC[0])**2 + (origin[1]-newC[1])**2 + (origin[2]-newC[2])**2)
+            let distance = Math.sqrt((origin[0]-newCp1[0])**2 + (origin[1]-newCp1[1])**2 + (origin[2]-newCp1[2])**2)
+
+            let screen_width = distance * width_growth_factor
+            let screen_height = distance * height_growth_factor
+
+            /*let wp = (w_index + screen_width/2)/screen_width
+            let hp = (h_index + screen_height/2)/screen_height
+
+            wp*=(screen_width_pixels-1)
+            hp*=(screen_height_pixels-1)
+            wp = Math.floor(wp)
+            hp = Math.floor(hp)*/
+            x1 = (w_index + screen_width/2)/screen_width
+            y1 = (h_index + screen_height/2)/screen_height
+
+            x1*=(screen_width_pixels-1)
+            y1*=(screen_height_pixels-1)
+            x1 = Math.floor(x1)
+            y1 = Math.floor(y1)
+
+            //document.getElementById(wp+','+hp).style.backgroundColor = colour;
+        }
+        else
+        {
+            x1=Math.floor(newCp1[0])
+            y1=Math.floor(newCp1[1])
+        }
+        if(newCp2.length == 3)//for not completely mixed direction
+        {
+            let w_index = (p2[0]-newCp2[0])*x_to_width + (p2[1]-newCp2[1])*y_to_width + (p2[2]-newCp2[2])*z_to_width
+            let h_index = (p2[0]-newCp2[0])*x_to_height + (p2[1]-newCp2[1])*y_to_height + (p2[2]-newCp2[2])*z_to_height
+
+            let distance = Math.sqrt((origin[0]-newCp2[0])**2 + (origin[1]-newCp2[1])**2 + (origin[2]-newCp2[2])**2)
+
+            let screen_width = distance * width_growth_factor
+            let screen_height = distance * height_growth_factor
+
+            x2 = (w_index + screen_width/2)/screen_width
+            y2 = (h_index + screen_height/2)/screen_height
+
+            x2*=(screen_width_pixels-1)
+            y2*=(screen_height_pixels-1)
+            x2 = Math.floor(x2)
+            y2 = Math.floor(y2)
+
+            //document.getElementById(wp+','+hp).style.backgroundColor = colour;
+        }
+        else
+        {
+            x2=Math.floor(newCp2[0])
+            y2=Math.floor(newCp2[1])
+        }
+        /*else//when direction is fully mixed math is donw in find center
+        {
+            //document.getElementById(Math.floor(newC[0])+','+Math.floor(newC[1])).style.backgroundColor = colour;
+        }*/
+        //if(atleast_one([x1,y1], [x2,y2]))
+        //{
+            let [p11, p22] = truncate([x1,y1],[x2,y2])
+            line(p11[0],p11[1], p22[0], p22[1]);
+        //}
+             
+    }
+    //}
+}
+
+/*
+types of lines to render
+
+both points on screen
+one point on screen one point (left right up down)
+one point on screen one point behind user
+both points (left right up down)
+
+ignore (left,right,up,down to behind screen)
+
+
+
+
+*/

@@ -1,4 +1,6 @@
 - render lines (Done)
+- make movement relative to the way user is facing (Done)
+
 
 - work it geometries that are only partialy on the screen (partialy done)
     works for lines that go if the side of the screen
@@ -7,7 +9,7 @@
 
 
 
-- make movement relative to the way a user is facing not current is relative to xy_angle = 0
+
 - convert to c#
 - quick check if point are likely to be off screen before more precise pixel accurate rendering
 - create object class structure with faces - > groups of three point
