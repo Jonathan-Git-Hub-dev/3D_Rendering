@@ -13,6 +13,9 @@
     one point in front of screen one point behind(not exactly sure how to tackle this)
 */
 
+//is it posible to have a point off of the screen to the left per say and a point behind the user that produces stuff of the screen
+console.log("not sure if the above question is true or not, currently acting as if it is defacto false")
+
 function Cos(angle)
 {
     return(Math.cos(angle*(Math.PI / 180)))
@@ -241,7 +244,7 @@ function move_user(event)
     document.getElementById(100+','+50).style.backgroundColor = 'black';
 }
 
-function dl(x1,y1,x2,y2)
+function line(x1,y1,x2,y2)
 {//this algorithm was copied from google
     //const points = [];
     console.log("Inital: " + x1 + " " + x2 + " " + y1 + " " + y2)
@@ -330,6 +333,134 @@ function dl(x1,y1,x2,y2)
         }
        // console.log("Done");    
 }*/
+
+function infront_or_behind(point, origin, z_angle, xy_angle)
+{
+
+    //find 'movement' vector
+    let temp_z_angle = (z_angle < 90 ? -1*(90-z_angle): z_angle-90);
+    //let temp_xy_angle = xy_angle
+    let zgrad = Sin(temp_z_angle);
+    //console.log("zan " + temp_z_angle +" zg " + zgrad);
+    let remainder =  Math.sqrt(1-zgrad**2);
+
+    let xgrad;
+    let ygrad;
+    if(xy_angle < 90)
+    {
+        ygrad = -1*Cos(xy_angle) * remainder
+        xgrad = Sin(xy_angle) * remainder
+    }   
+    else if(xy_angle < 180)
+    {
+        ygrad = Sin(xy_angle-90) * remainder
+        xgrad = Cos(xy_angle-90) * remainder
+    }
+    else if(xy_angle < 270)
+    {
+        ygrad = Cos(xy_angle-180) * remainder
+        xgrad = -1*Sin(xy_angle-180) * remainder
+    }
+    else//< 360 
+    {
+        ygrad = -1*Sin(xy_angle-270) * remainder
+        xgrad = -1*Cos(xy_angle-270) * remainder
+    }
+
+    //opistie 'movement' vector
+    let opposite_zgrad = -1*zgrad
+    let opposite_xgrad = -1*xgrad
+    let opposite_ygrad = -1*ygrad
+
+    let front_point = [origin[0] + xgrad, origin[1] + ygrad, origin[2] + zgrad]
+    let behind_point = [origin[0] + opposite_xgrad, origin[1] + opposite_ygrad, origin[2]+opposite_zgrad]
+
+    //find which of these 'dot' our point is closest to
+
+    //note no need to square root
+    let front_dist = (front_point[0]-p1[0])**2 + (front_point[1]-p1[1])**2 + (front_point[2]-p1[2])**2
+    let back_dist = (behind_point[0]-p1[0])**2 + (behind_point[1]-p1[1])**2 + (behind_point[2]-p1[2])**2
+
+    if(front_dist < back_dist)
+    {
+        return true
+    }
+
+    return false;//behind or on the plane of origin
+
+}
+
+
+function behind_and_infront(p1, p2, origin, z_angle, xy_angle)
+{
+    console.log("i think this may have be solved byut what is point is on the plane of origin");
+
+    //figure out how to render point running from infront of user to behind user
+
+    //old aglo
+        //from now on p1 is the point on the screen
+        //find the difference between the points p1-p2
+        //add this difference to p1 to create p3
+        //p3 is garentted to be infront of origin
+        //find p3s cowardinates on screen
+        //find the gradient between p1 and p3
+        //to plot the line between p1 and p2 use -1*gradient from p1 until edge of the screen is reached
+
+    //find the point infront and the point behind
+    //may be both in which case this point does not need to be redered
+    //this functionality will probably be moved out at one point
+    let front_point;
+    let behind_point;
+    
+    if(!infront_or_behind(p1, origin, z_angle, xy_angle) && !infront_or_behind(p2, origin, z_angle, xy_angle))
+    {
+        return;
+    }
+    if(infront_or_behind(p1, origin, z_angle, xy_angle) && infront_or_behind(p2, origin, z_angle, xy_angle))
+    {
+        return;
+    }
+    if(infront_or_behind(p1, origin, z_angle, xy_angle))
+    {
+        front_point = p1
+        behind_point = p2
+    }
+    else
+    {
+        front_point = p2
+        behind_point = p1
+    }
+
+    //p3 is a point half way between p1 and p2
+    //if this point is still behind origin p3 becomes halfway between p1 and p3
+    let p3;
+    do
+    {
+        //p-1 //p-8 half way =-4.5
+        let xdif = (behind_point[0] - front_point[0])/2
+        let ydif = (behind_point[1] - front_point[1])/2
+        let zdif = (behind_point[2] - front_point[2])/2
+
+        p3 = [behind_point[0] - xdif,behind_point[1] - ydif,behind_point[2] - zdif]
+        behind_point = p3;
+
+    }while(!infront_or_behind(p3))
+
+    //plot both points to find gradient
+    //save p1 plot
+    //find where gradient intersects border and use that as the second point for the line 
+
+}
+
+function triangle_middle(p1,p2,p3)
+{
+    //take two of the points (arbitrary)
+    //for p1 draw a line to the middle point between p2 and p3
+    //for p2 second point draw aline to the middle between p1 and p3
+    //where these 3d lines intersect is the center of our triangle 
+}
+
+
 
 function atleast_one(p1, p2)
 {
@@ -497,7 +628,7 @@ function render(colour, lines, origin, z_angle, xy_angle)
         if(atleast_one([x1,y1], [x2,y2]))
         {
             let [p11, p22] = truncate([x1,y1],[x2,y2])
-            dl(p11[0],p11[1], p22[0], p22[1]);
+            line(p11[0],p11[1], p22[0], p22[1]);
         }        
     }
     //}
