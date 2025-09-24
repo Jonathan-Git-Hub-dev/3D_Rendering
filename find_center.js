@@ -80,12 +80,27 @@ function translate_2d(origin, point, z_angle, xy_angle, vector)
 
      //distances
     let distance = Math.sqrt((newc[0]-origin[0])**2 + (newc[1]-origin[1])**2 + (newc[2]-origin[2])**2);
+    
+    if(distance == 0)
+    {
+        console.log("this makes stuff go really wrong")
+        return false;
+    }
+
     let max_w = distance * width_growth_factor
     let max_h = distance * height_growth_factor
 
     //console.log("dv " + dv + " as % " + dv/(max_w/2))
     //console.log("dh " + dh + " as % Matha floor FLOTOR FLOOR FLOOR" + dh/(max_w/2) )
+            //console.log('td')
 
+    /*console.log("in translate 2d " + (Math.floor(100 + (dh/(max_w/2))*100)) +" "+ (Math.floor(50 + (dv/(max_h/2))*50)))
+    console.log(dh)
+    console.log(dv)
+    console.log(max_w)
+    console.log(max_h)
+    console.log(origin)
+    console.log(point)*/
     return [Math.floor(100 + (dh/(max_w/2))*100), Math.floor(50 + (dv/(max_h/2))*50)]
 
 }

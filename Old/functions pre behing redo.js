@@ -1,3 +1,24 @@
+else if(p1_check || p2_check)
+        {
+            console.log('second')
+            //one point infront one point behind
+            /*let [new_p1, new_p2] = behind_and_infront(p1, p2, origin, vector)
+
+            let p11 = translate_2d(origin, new_p1, z_angle, xy_angle, vector)
+            let p22 = translate_2d(origin, new_p2, z_angle, xy_angle, vector)
+
+            let [p111, p222] = arbitray_line_endpoint(p11, p22)
+
+            let [p1111,p2222] = truncate(p111,p222);
+            line(colour, p1111[0],p1111[1], p2222[0], p2222[1]);*/
+
+
+            
+
+            
+        }
+
+
 //import {screen_width_pixels, screen_height_pixels, width_growth_factor, height_growth_factor} from './variables.js'
 
 //what if point one beyond left of screen and point two passed the right boundery
@@ -103,103 +124,14 @@ function clear()//changes all pixelss back to aqua
     }
 }
 
-function roughly_equal(arr1, arr2)
-{
-    for(let i=0; i< arr1.length; i++)
-    {
-        if(arr1[i].toFixed(5) != arr2[i].toFixed(5))
-        {
-            return false;
-        }
-    }
-    return true
-}
-
-function through_origin(origin, p1, p2)
-{
-    //if points pass through origin
-    //to some level of presison
-
-    let between_line_vector = [p1[0]-p2[0],p1[1]-p2[1],p1[2]-p2[2]]
-
-    /*parametric form 
-        x = p1[0] + t * between_line_vector[0]
-        y = p1[1] + t * between_line_vector[1]
-          z = p1[2] + t * between_line_vector[2]
-    */
-
-    /*
-        p[0,0,0]
-        v[1,0,0]
-    */
-
-    //if component of vector is 0 avoid it
-    if(between_line_vector[0] != 0)
-    {
-        //find t for origin x
-        let t = origin[0]-p1[0]/between_line_vector[0];
-        let y = p1[1] + t * between_line_vector[1]
-        let z = p1[2] + t * between_line_vector[2]
-
-        return roughly_equal(origin, [origin[0],y,z])
-    }
-    else if(between_line_vector[1] != 0)
-    {
-        let t = origin[1]-p1[1]/between_line_vector[1];
-        let x = p1[0] + t * between_line_vector[0]
-        let z = p1[2] + t * between_line_vector[2]
-
-        return roughly_equal(origin, [x,origin[1],z])
-    }
-    else
-    {//z 
-        let t = origin[2]-p1[2]/between_line_vector[2];
-        let x = p1[0] + t * between_line_vector[0]
-        let y = p1[1] + t * between_line_vector[1]
-
-        return roughly_equal(origin, [x,y,origin[2]])
-    }
-}
 
 function arbitray_line_endpoint(p1, p2)
 {
     console.log('this kind of sucks')
     //p1 is our start point
 
-    //with gradient from p1 to p2 find where the line exits screen and make this point p2 
-    let rise = p1[1]-p2[1];
-    let run = p1[0]-p2[0];
-
-    if(rise == 0)
-    {
-        if(p1[0] - p2[0] < 0)
-        {//going right
-            p2[0] = screen_width_pixels-1
-        }
-        else
-        {//goinf left
-            p2[0] = 0
-        }
-
-        return [p1,p2]
-    }
-
-
-    if(run == 0)
-    {
-        if(p1[1] - p2[1] < 0)
-        {//going right
-            p2[1] = screen_height_pixels-1
-        }
-        else
-        {//goinf left
-            p2[1] = 0
-        }
-
-        return [p1,p2]
-    }
-
-    let gradient = rise/run;
+    //with gradient from p1 to p2 find where the line exits screen and make this point p2
+    let gradient = p1[1]-p2[1]/p1[0]-p2[0];
     let intercept = p2[1] - gradient*p2[0];
 
     //which way is x moving p2[0] - p1[0]
@@ -208,29 +140,14 @@ function arbitray_line_endpoint(p1, p2)
 
     if(x_mov > y_mov)
     {
-        if(x_mov < 0)
-        {
-            p2[0] = -100000000
-            p2[1] = gradient*p2[0]+intercept
-        }
-        else
-        {
-            p2[0] = 100000000
-            p2[1] = gradient*p2[0]+intercept
-        }
+        p2[0] = 100000000
+        p2[1] = gradient*p2[0]+intercept
     }
     else//y or both the same
     {
-        if(y_mov < 0)
-        {
-            p2[1] = -100000000
-            p2[0] = Math.floor((p2[1]-intercept)/gradient)
-        }
-        else
-        {
-            p2[1] = 100000000
+        p2[1] = 100000000
+        //p2[0] = gradient*p[0]+intercept
         p2[0] = Math.floor((p2[1]-intercept)/gradient)
-        }
     }
 
 
@@ -425,8 +342,6 @@ function on_screen(point)
 
 function pass_through_screen(p1, p2)
 {
-    console.log("pts " + p1 + " " +  p2)
-
     let rise = p1[1] - p2[1];
     let run = p1[0] - p2[0];
     
@@ -467,58 +382,32 @@ function pass_through_screen(p1, p2)
     //console.log(p1+" "+p2)
     let gradient = rise/run
     let intercept = p2[1] - gradient*p2[0];
-    console.log("grad here should be checked " + gradient +" "+ intercept);
+    //console.log("grad here should be checked " + gradient +" "+ intercept);
 
     let left_point = gradient*0+intercept;
     if(left_point >= 0 && left_point <screen_height_pixels)
     {
-        //console.log('111111');
-        if((left_point <= p1[1] && left_point >= p2[1]) || (left_point <= p2[1] && left_point >= p1[1]))
-        {
-            return true
-        }
+        return true
     }
     let right_point = gradient*(screen_width_pixels-1)+intercept;
+    console.log('right ' + right_point)
     if(right_point >= 0 && right_point < screen_height_pixels)
     {
-        //console.log('222222');
-        if((right_point <= p1[1] && right_point >= p2[1]) || (right_point <= p2[1] && right_point >= p1[1]))
-        {
-            return true
-        }
+        return true
     }
     let top_point = -1*intercept/gradient
-    console.log('top_point ' + top_point)
     if(top_point >=0 && top_point < screen_width_pixels)
     {
-        //console.log('33333');
-        //console.log(top_point + "  tp")
-        //return true
-        console.log('>>> ' + p1[1] + " " + top_point + " " + p2[1])
-        console.log((top_point <= p1[1]))
-        console.log((top_point >= p2[1]))
-        console.log((top_point <= p2[1]))
-        console.log((top_point >= p1[1]) + " " + p1[1] + " " + top_point)
-
-        if((top_point <= p1[0] && top_point >= p2[0]) || (top_point <= p2[0] && top_point >= p1[0]))
-        {
-            console.log('very very food')
-            return true
-        }
+        return true
     }
     let bottom_point = ((screen_height_pixels-1)-intercept)/gradient;
     if(bottom_point >=0 && bottom_point < screen_width_pixels)
     {
-        //console.log('44444');
-        //return true
-        if((bottom_point <= p1[0] && bottom_point >= p2[0]) || (bottom_point <= p2[0] && bottom_point >= p1[0]))
-        {
-            return true
-        }
+        return true
     }
     //check for y = min or max if x in correct range
 
-    //console.log('does not pass through')
+
     return false;
 }
 
