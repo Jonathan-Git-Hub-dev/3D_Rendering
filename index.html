@@ -3,6 +3,7 @@
     <head>
         <link rel="stylesheet" href="Css/screen.css">
         <script src="functions.js"></script>
+        <script src="faces_function.js"></script>
         <script src="variables.js"></script> 
         <script src="find_center.js"></script> 
         <script src="main.js"></script>
@@ -16,9 +17,31 @@
             <p>X-Y: </p><p id="xy">?</p>
             <p>Origin: </p><p id="origin">?</p>
         </div>
+        <button onclick="myFunction()">Calc</button>
     </body>
     <script>
         //setting up screen
         document.addEventListener('DOMContentLoaded', create_screen)
+
+        function myFunction()
+        {
+            /*let x = 2
+            let y = 9
+            let z = 1
+
+            console.log((28 - 6*y - 4*z)/4)
+            console.log((28 - 4*x - 4*z)/6)
+            console.log((28 - 4*x - 6*y)/4)*/
+            let nv = [4,6,4]
+            let x1 = 1
+            let y1 = 2
+            let z1 = 3
+
+            let x = 3
+            let y = -20
+            let z = -2
+
+            console.log((nv[0]*x - nv[0]*x1 +  nv[1]*y - nv[1]*y1 +  nv[2]*z - nv[2]*z1))
+        }
     </script>
 </html> 

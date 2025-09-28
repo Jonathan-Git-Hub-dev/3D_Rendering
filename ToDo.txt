@@ -1,9 +1,24 @@
 - render lines (Done)
 - make movement relative to the way user is facing (Done)
 - render geometries that are only partialy on screen (Done)
-
+- Ignore insides of faces (Done)
+- Print order determined min heap (max of points in a face)
 
 
 - convert to c#
 - create object class structure with faces - > groups of three point
 - render triangles
+    - compute which sides of an object are internal and external
+    - when a triangle is split/mutated by screen render, as multiple triangles
+    - 
+
+
+heap of non furtherest face
+
+
+Things to implement in c#
+- windows
+- removing the mouse icon to scroll
+- escape brings up menu
+- UDP 
+

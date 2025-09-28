@@ -100,6 +100,7 @@ function clear()//changes all pixelss back to aqua
     for(let i=0; i < (screen_width_pixels*screen_height_pixels) ; i++)
     {
         document.getElementById(String(i%screen_width_pixels)+","+String(Math.floor(i/screen_width_pixels))).style.backgroundColor = "aqua"
+        rendered[Number(String(i%screen_width_pixels))][Number(String(Math.floor(i/screen_width_pixels)))] = false;
     }
 }
 
@@ -553,16 +554,6 @@ function pass_through_screen(p1, p2)
     return false;
 }*/
 
-function triangle_middle(p1,p2,p3)
-{
-    //take two of the points (arbitrary)
-    //for p1 draw a line to the middle point between p2 and p3
-    //for p2 second point draw aline to the middle between p1 and p3
-    //where these 3d lines intersect is the center of our triangle 
-
-    //definately can use 2 vecotor in a single plane to fine the congruent vector for that plane
-}
-
 
 
 /*function atleast_one(p1, p2)
@@ -575,7 +566,7 @@ function triangle_middle(p1,p2,p3)
     return true;
 }*/
 
-function both(p1,p2)
+function bothto(p1,p2)
 {
     if(p1[0] >= 0 && p1[0] < screen_width_pixels && p1[1] >= 0 && p1[1] < screen_height_pixels 
         && p2[0] >= 0 && p2[0] < screen_width_pixels && p2[1] >= 0 && p2[1] < screen_height_pixels)

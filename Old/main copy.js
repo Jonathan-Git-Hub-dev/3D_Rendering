@@ -330,16 +330,16 @@ function tri(v0, v1, v2, colour_arr)
             // For edge v2-v0:
             let edge2_val = (p.x - v2[0]) * (v0[1] - v2[1]) - (p.y - v2[1]) * (v0[0] - v2[0])
 
-            //console.log(Number(String(Math.round(p.x)))+" "+Number(String(Math.round(p.y))))
-            if(rendered[Math.round(p.x)][Math.round(p.y)] == true)//square not already rendered in
+            console.log(Number(String(Math.round(p.x)))+" "+Number(String(Math.round(p.y))))
+            if(rendered[Number(String(Math.round(p.x)))][Number(String(Math.round(p.y)))] == true)//square not already rendered in
             {
-                console.log("no need to");
+
             }
             else if (edge0_val >= 0 && edge1_val >= 0 && edge2_val >= 0)
             {
                 //console.log('before crash ' + p.x + " " +p.y);
                 let temp = document.getElementById( String(Math.round(p.x))+','+String(Math.round(p.y)))
-                rendered[Math.round(p.x)][Math.round(p.y)] = true;
+                rendered[String(Math.round(p.x))+','+String(Math.round(p.y))] = true;
                 temp.style.backgroundColor = 'rgb('+ colour_arr[0] +','+ colour_arr[1] +','+ colour_arr[2] +')';
             }
 
@@ -416,11 +416,7 @@ function calc_colour(r,g,b, face, inside_point)
 
 }
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function render2(hm, colour, shapes, origin, z_angle, xy_angle)
+function render2(hm, colour, shape, origin, z_angle, xy_angle)
 {
     //console.log(shape)
     //console.log('shpe 0' + shape[0])
@@ -428,98 +424,38 @@ async function render2(hm, colour, shapes, origin, z_angle, xy_angle)
     //first and basic atemp to render faces
     //console.log('render called')
 
-
-    //render find furthrest point on face for each face
-    //use a min heap to regulate print order
-
-    let this_should_be_a_heap = []
-
-    for(let i=0; i<shapes.length; i++)
-    {
-        for(let j=0; j<shapes[i].length; j++)//for faces in a object
-        {
-            let dis1 = distance_total(origin,shapes[i][j][0])
-            let dis3 = distance_total(origin,shapes[i][j][1])
-            let dis2 = distance_total(origin,shapes[i][j][2])
-            
-            
-            let max_dist = Math.max(dis1,dis2,dis3)
-            //save distance and index in shapes
-            let temp_arr = [max_dist,i,j];
-            //console.log(temp_arr)
-            //this_should_be_a_heap.concat(temp_arr)
-            this_should_be_a_heap.push(temp_arr)
-            //console.log(this_should_be_a_heap)
-        }
-    }
-
-    //this_should_be_a_heap.sort((a, b) => a[0] - b[0]);
-    console.log(this_should_be_a_heap)
-    //this_should_be_a_heap.sort((a, b) => b[2]-a[2]);
-    //console.log(""+this_should_be_a_heap)
-
-    let tsbh2 = []
-
-    while(this_should_be_a_heap.length != 0)
-    {
-        let smallest = 10000000
-        let idx;
-
-        //console.log(this_should_be_a_heap.length)
-        for(let i=0; i<this_should_be_a_heap.length; i++)
-        {
-            //console.log('single item ' + this_should_be_a_heap[i][0])
-            if(this_should_be_a_heap[i][0] < smallest)
-            {
-                //console.log('cand found');
-                smallest = this_should_be_a_heap[i][0]
-                idx = i
-            }
-        }
-        tsbh2.push(this_should_be_a_heap[idx])
-        //console.log('first ' + this_should_be_a_heap[idx])
-        this_should_be_a_heap.splice(idx, 1);
-    }
-
-    console.log(tsbh2)
-
     let vector = line_of_sight_vector(z_angle, xy_angle);
-    /*for(let h=0; h<shapes.length; h++)
-    {
-    for(let i=0; i<shapes[h].length; i++)
+    for(let i=0; i<shape.length; i++)
     {
         //if closer to inside point then outside dont render this face
         //console.log('i '+i)
         //console.log(hm.get(shape[i]))
         //console.log(distance_total(origin,hm.get(shape[i])[0]) +" "+ distance_total(origin,hm.get(shape[i])[1]))
-        if(distance_total(origin,hm[h].get(shapes[h][i])[0]) < distance_total(origin,hm[h].get(shapes[h][i])[1]))
+        if(distance_total(origin,hm.get(shape[i])[0]) < distance_total(origin,hm.get(shape[i])[1]))
         {
             console.log('face skipped 1');
             continue
         }
-        else if(distance_total(origin,hm[h].get(shapes[h][i])[0]) == distance_total(origin,hm[h].get(shapes[h][i])[1]))
+        else if(distance_total(origin,hm.get(shape[i])[0]) == distance_total(origin,hm.get(shape[i])[1]))
         {
             console.log('face skipped 2');
             continue
         }
-       
-        let p1 = shapes[h][i][0]
-        let p2 = shapes[h][i][1]
-        let p3 = shapes[h][i][2]
+        /*//for points in each face
+        for(let j=0; j<lines[i].length; j++)
+        {
+    
+        }*/
+        let p1 = shape[i][0]
+        let p2 = shape[i][1]
+        let p3 = shape[i][2]
 
         let p11 = translate_2d(origin, p1, z_angle, xy_angle, vector)
         let p22 = translate_2d(origin, p2, z_angle, xy_angle, vector)
         let p33 = translate_2d(origin, p3, z_angle, xy_angle, vector)
 
-        let colour_array;
-        if(h==0)
-        {
-            colour_array = calc_colour(255,0,0, shapes[h][i], hm[h].get(shapes[h][i])[0])
-        }
-        else
-        {
-            colour_array = calc_colour(0,255,0, shapes[h][i], hm[h].get(shapes[h][i])[0])
-        }
+        let colour_array = calc_colour(255,0,0, shape[i], hm.get(shape[i])[0])
+
         tri(p11, p22, p33, colour_array)
         tri(p11, p33, p22, colour_array)
         tri(p22, p11, p33, colour_array)
@@ -534,52 +470,9 @@ async function render2(hm, colour, shapes, origin, z_angle, xy_angle)
 
 
     }
-    }*/
-    for(let h=0; h<tsbh2.length; h++)
-    {
-        //[dist, shape, face]
-        let si = tsbh2[h][1]
-        let fi = tsbh2[h][2]
-        if(distance_total(origin,hm[si].get(shapes[si][fi])[0]) < distance_total(origin,hm[si].get(shapes[si][fi])[1]))
-        {
-            console.log('face skipped 1');
-            continue
-        }
-        else if(distance_total(origin,hm[si].get(shapes[si][fi])[0]) == distance_total(origin,hm[si].get(shapes[si][fi])[1]))
-        {
-            console.log('face skipped 2');
-            continue
-        }
-       
-        let p1 = shapes[si][fi][0]
-        let p2 = shapes[si][fi][1]
-        let p3 = shapes[si][fi][2]
-
-        let p11 = translate_2d(origin, p1, z_angle, xy_angle, vector)
-        let p22 = translate_2d(origin, p2, z_angle, xy_angle, vector)
-        let p33 = translate_2d(origin, p3, z_angle, xy_angle, vector)
-
-        let colour_array;
-        if(si == 1)
-        {
-            colour_array = calc_colour(255,0,0, shapes[si][fi], hm[si].get(shapes[si][fi])[0])
-        }
-        else
-        {
-            colour_array = calc_colour(0,255,0, shapes[si][fi], hm[si].get(shapes[si][fi])[0])
-        }
-        tri(p11, p22, p33, colour_array)
-        tri(p11, p33, p22, colour_array)
-        tri(p22, p11, p33, colour_array)
-        tri(p22, p33, p11, colour_array)
-        tri(p33, p22, p11, colour_array)
-        tri(p33, p11, p22, colour_array)
-        //await sleep(1000);
-    }
-}
 
 
-/*for(let i=0; i<lines.length; i++)
+    /*for(let i=0; i<lines.length; i++)
     {
         //console.log("df")
         let p1 = lines[i][0]
@@ -663,3 +556,4 @@ async function render2(hm, colour, shapes, origin, z_angle, xy_angle)
         //else both point behind user impossible render this line on screen
 
     }//console.log('done round')*/
+}
